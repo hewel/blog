@@ -18,15 +18,23 @@
     "lint": "eslint \"src/**/*.ts*\"",
     "preview": "qwik build preview && vite preview --open",
     "start": "vite --open --mode ssr",
-    "qwik": "qwik"
+    "qwik": "qwik",
+    "db:generate": "drizzle-kit generate:sqlite",
+    "db:pull": "drizzle-kit introspect:sqlite",
+    "db:push": "drizzle-kit push:sqlite"
   },
   "devDependencies": {
+    "@auth/core": "^0.7.1",
     "@builder.io/qwik": "^1.2.3",
+    "@builder.io/qwik-auth": "~0.1.0",
     "@builder.io/qwik-city": "^1.2.3",
     "@types/eslint": "8.40.2",
     "@types/node": "^20.3.1",
     "@typescript-eslint/eslint-plugin": "5.60.0",
     "@typescript-eslint/parser": "5.60.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "dotenv": "^16.3.1",
+    "drizzle-kit": "^0.19.3",
     "eslint": "8.43.0",
     "eslint-plugin-qwik": "^1.2.3",
     "prettier": "2.8.8",
@@ -34,5 +42,17 @@
     "undici": "5.22.1",
     "vite": "4.3.9",
     "vite-tsconfig-paths": "4.2.0"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.2.2",
+    "date-fns": "^2.30.0",
+    "drizzle-orm": "^0.27.0",
+    "fp-ts": "^2.16.0",
+    "nanoid": "^4.0.2"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }

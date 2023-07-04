@@ -1,19 +1,21 @@
 import { component$ } from "@builder.io/qwik";
 import { type DocumentHead } from "@builder.io/qwik-city";
-import { useAuthSession } from "./plugin@auth";
+import { useAuthSignin } from "~/routes/plugin@auth";
 
 export default component$(() => {
-  const session = useAuthSession();
+  const signIn = useAuthSignin();
 
   return (
     <>
-      <h1>Hi 👋</h1>
-      <p>
-        Can't wait to see what you build with qwik!
-        <br />
-        Happy coding.
-      </p>
-      <p>{JSON.stringify(session.value)}</p>
+      <button
+        onClick$={() =>
+          signIn.submit({
+            providerId: "discord",
+          })
+        }
+      >
+        Sign In
+      </button>
     </>
   );
 });
