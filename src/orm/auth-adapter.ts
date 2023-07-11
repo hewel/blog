@@ -3,22 +3,7 @@ import { eq, and } from "drizzle-orm"
 import { task as T, taskOption as TO, option as O } from "fp-ts"
 import { pipe } from "fp-ts/function"
 import { nanoid } from "nanoid"
-import { getUnixTime, fromUnixTime } from "date-fns"
 import { createDb, schema as s } from "./"
-
-const parseDateAt =
-  <K extends string>(key: K) =>
-  <T extends Partial<Record<K, Date | null>>>(dict: T): T & Record<K, number | undefined> => ({
-    ...dict,
-    [key]: pipe(dict[key], O.fromNullable, O.map(getUnixTime), O.toUndefined),
-  })
-
-const toDateAt =
-  <K extends string>(key: K) =>
-  <T extends Record<K, number | null>>(dict: T): T & Record<K, Date | undefined> => ({
-    ...dict,
-    [key]: pipe(dict[key], O.fromNullable, O.map(fromUnixTime), O.toUndefined),
-  })
 
 const tryCatchNullable = T.map(O.fromNullable)
 
@@ -34,9 +19,7 @@ export const DrizzleAdapter = ({ url, authToken }: AdapterOptions): Adapter => {
     createUser: (user) =>
       pipe(
         { ...user, id: nanoid(8) },
-        parseDateAt("emailVerified"),
         (data) => () => db.insert(s.user).values(data).returning().get(),
-        T.map(toDateAt("emailVerified")),
       )(),
     getUser: (id) =>
       pipe(
@@ -45,7 +28,7 @@ export const DrizzleAdapter = ({ url, authToken }: AdapterOptions): Adapter => {
             where: eq(s.user.id, id),
           }),
         ),
-        TO.matchW(() => null, toDateAt("emailVerified")),
+        TO.getOrElseW(() => T.of(null)),
       )(),
     getUserByEmail: (email) =>
       pipe(
@@ -54,7 +37,7 @@ export const DrizzleAdapter = ({ url, authToken }: AdapterOptions): Adapter => {
             where: eq(s.user.email, email),
           }),
         ),
-        TO.matchW(() => null, toDateAt("emailVerified")),
+        TO.getOrElseW(() => T.of(null)),
       )(),
     getUserByAccount: ({ providerAccountId, provider }) =>
       pipe(
@@ -70,19 +53,17 @@ export const DrizzleAdapter = ({ url, authToken }: AdapterOptions): Adapter => {
           }),
         ),
         TO.map(({ user }) => user),
-        TO.matchW(() => null, toDateAt("emailVerified")),
+        TO.getOrElseW(() => T.of(null)),
       )(),
     updateUser: ({ id, ...data }) =>
       pipe(
         data,
-        parseDateAt("emailVerified"),
         (data) => () => db.update(s.user).set(data).where(eq(s.user.id, id!)).returning().get(),
-        T.map(toDateAt("emailVerified")),
       )(),
     deleteUser: (userId) =>
       pipe(
         tryCatchNullable(() => db.delete(s.user).where(eq(s.user.id, userId)).returning().get()),
-        TO.matchW(() => null, toDateAt("emailVerified")),
+        TO.getOrElseW(() => T.of(null)),
       )(),
     linkAccount: ({ expires_in, ...data }) =>
       db.insert(s.account).values(data).returning().get() as Promise<AdapterAccount>,
@@ -95,12 +76,7 @@ export const DrizzleAdapter = ({ url, authToken }: AdapterOptions): Adapter => {
         .returning()
         .get() as Promise<AdapterAccount>,
     createSession: ({ sessionToken, userId, expires }) =>
-      db
-        .insert(s.session)
-        .values({ sessionToken, userId, expires: getUnixTime(expires) })
-        .returning()
-        .get()
-        .then(toDateAt("expires")),
+      db.insert(s.session).values({ sessionToken, userId, expires }).returning().get(),
     getSessionAndUser: (sessionToken) =>
       pipe(
         tryCatchNullable(() =>
@@ -114,33 +90,27 @@ export const DrizzleAdapter = ({ url, authToken }: AdapterOptions): Adapter => {
         TO.matchW(
           () => null,
           ({ user, ...session }) => ({
-            session: toDateAt("expires")(session),
-            user: toDateAt("emailVerified")(user),
+            session: session,
+            user: user,
           }),
         ),
       )(),
     updateSession: ({ sessionToken, ...data }) =>
       db
         .update(s.session)
-        .set(parseDateAt("expires")(data))
+        .set(data)
         .where(eq(s.session.sessionToken, sessionToken))
         .returning()
-        .get()
-        .then(toDateAt("expires")),
+        .get(),
     deleteSession: (sessionToken) =>
       pipe(
         tryCatchNullable(() =>
           db.delete(s.session).where(eq(s.session.sessionToken, sessionToken)).returning().get(),
         ),
-        TO.matchW(() => null, toDateAt("expires")),
+        TO.getOrElseW(() => T.of(null)),
       )(),
     createVerificationToken: ({ identifier, expires, token }) =>
-      db
-        .insert(s.verificationToken)
-        .values({ identifier, token, expires: getUnixTime(expires) })
-        .returning()
-        .get()
-        .then(toDateAt("expires")),
+      db.insert(s.verificationToken).values({ identifier, token, expires }).returning().get(),
     useVerificationToken: async ({ identifier, token }) => {
       try {
         const verificationToken = await db
@@ -153,7 +123,7 @@ export const DrizzleAdapter = ({ url, authToken }: AdapterOptions): Adapter => {
           )
           .returning()
           .get()
-        return pipe(O.fromNullable(verificationToken), O.map(toDateAt("expires")), O.toNullable)
+        return pipe(O.fromNullable(verificationToken), O.toNullable)
       } catch {
         return null
       }
