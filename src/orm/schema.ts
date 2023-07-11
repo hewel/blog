@@ -1,5 +1,5 @@
-import { sqliteTable, integer, text, primaryKey } from "drizzle-orm/sqlite-core";
-import { relations } from "drizzle-orm";
+import { sqliteTable, integer, text, primaryKey } from "drizzle-orm/sqlite-core"
+import { relations } from "drizzle-orm"
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
@@ -9,7 +9,7 @@ export const user = sqliteTable("user", {
   image: text("image"),
   phone: text("phone"),
   role: text("role"),
-});
+})
 
 export const account = sqliteTable(
   "account",
@@ -30,8 +30,8 @@ export const account = sqliteTable(
   },
   (table) => ({
     pk: primaryKey(table.provider, table.providerAccountId),
-  })
-);
+  }),
+)
 
 export const session = sqliteTable("session", {
   sessionToken: text("sessionToken").notNull(),
@@ -39,7 +39,7 @@ export const session = sqliteTable("session", {
     .references(() => user.id)
     .notNull(),
   expires: integer("expires").notNull(),
-});
+})
 
 export const verificationToken = sqliteTable(
   "verificationToken",
@@ -50,24 +50,24 @@ export const verificationToken = sqliteTable(
   },
   (table) => ({
     pk: primaryKey(table.identifier, table.token),
-  })
-);
+  }),
+)
 
 export const userRelations = relations(user, ({ many }) => ({
   accounts: many(account),
   sessions: many(session),
-}));
+}))
 
 export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
     references: [user.id],
   }),
-}));
+}))
 
 export const sessionRelations = relations(session, ({ one }) => ({
   user: one(user, {
     fields: [session.userId],
     references: [user.id],
   }),
-}));
+}))

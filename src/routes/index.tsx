@@ -1,9 +1,9 @@
-import { component$ } from "@builder.io/qwik";
-import { type DocumentHead } from "@builder.io/qwik-city";
-import { useAuthSession } from "./plugin@auth";
+import { component$ } from "@builder.io/qwik"
+import { type DocumentHead } from "@builder.io/qwik-city"
+import { useAuthSession } from "./plugin@auth"
 
 export default component$(() => {
-  const session = useAuthSession();
+  const session = useAuthSession()
 
   return (
     <>
@@ -15,8 +15,8 @@ export default component$(() => {
       </p>
       <p>{JSON.stringify(session.value)}</p>
     </>
-  );
-});
+  )
+})
 
 export const head: DocumentHead = {
   title: "Welcome to Qwik",
@@ -26,4 +26,4 @@ export const head: DocumentHead = {
       content: "Qwik site description",
     },
   ],
-};
+}

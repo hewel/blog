@@ -1,9 +1,9 @@
-import { component$ } from "@builder.io/qwik";
-import { type DocumentHead } from "@builder.io/qwik-city";
-import { useAuthSignin } from "~/routes/plugin@auth";
+import { component$ } from "@builder.io/qwik"
+import { type DocumentHead } from "@builder.io/qwik-city"
+import { useAuthSignin } from "~/routes/plugin@auth"
 
 export default component$(() => {
-  const signIn = useAuthSignin();
+  const signIn = useAuthSignin()
 
   return (
     <>
@@ -17,8 +17,8 @@ export default component$(() => {
         Sign In
       </button>
     </>
-  );
-});
+  )
+})
 
 export const head: DocumentHead = {
   title: "Welcome to Qwik",
@@ -28,4 +28,4 @@ export const head: DocumentHead = {
       content: "Qwik site description",
     },
   ],
-};
+}

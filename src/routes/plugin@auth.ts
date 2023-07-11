@@ -1,7 +1,7 @@
-import { serverAuth$ } from "@builder.io/qwik-auth";
-import Discord from "@auth/core/providers/discord";
-import type { Provider } from "@auth/core/providers";
-import { DrizzleAdapter } from "~/orm/auth-adapter";
+import { serverAuth$ } from "@builder.io/qwik-auth"
+import Discord from "@auth/core/providers/discord"
+import type { Provider } from "@auth/core/providers"
+import { DrizzleAdapter } from "~/orm/auth-adapter"
 
 export const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } = serverAuth$(
   ({ env }) => ({
@@ -20,5 +20,5 @@ export const { onRequest, useAuthSession, useAuthSignin, useAuthSignout } = serv
         clientSecret: env.get("DISCORD_CLIENT_SECRET")!,
       }),
     ] as Provider[],
-  })
-);
+  }),
+)
